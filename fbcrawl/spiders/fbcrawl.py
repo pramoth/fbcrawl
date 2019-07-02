@@ -131,11 +131,36 @@ class FacebookSpider(scrapy.Spider):
                 raise AttributeError('Language not recognized\n'
                                      'Change your interface lang from facebook ' 
                                      'and try again')
+
+        PAGES = [
+            'https://mbasic.facebook.com/groups/codesanook/',
+            'https://mbasic.facebook.com/groups/425807021332236/'
+        ]    
+        
+        pages = []
+        for page in PAGES:
+            pages.append(FacebookSpider.extractPageUrl(page))
                                                                  
-        #navigate to provided page
-        href = response.urljoin(self.page)
-        self.logger.info('Scraping facebook page {}'.format(href))
-        return scrapy.Request(url=href,callback=self.parse_page,meta={'index':1})
+        for page in pages:
+            self.page = page['page']
+            self.group = page['group']
+            href = response.urljoin(page['page'])
+            self.logger.info('Scraping facebook page {}'.format(href))
+            return scrapy.Request(url=href,callback=self.parse_page,meta={'index':1})
+
+    def extractPageUrl(url):
+        result = {}
+        if url.find('/groups/') != -1:
+            result = {'group' : 1}
+        else:
+            result = {'group' : 0}
+        if url.find('https://www.facebook.com/') != -1:
+            result['page'] = url[25:]
+        elif url.find('https://mbasic.facebook.com/') != -1:
+            result['page'] = url[28:]
+        elif url.find('https://m.facebook.com/') != -1:
+            result['page'] = url[23:]
+        return result
 
     def parse_page(self, response):
         '''
