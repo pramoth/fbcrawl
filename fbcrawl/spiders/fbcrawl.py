@@ -45,6 +45,8 @@ class FacebookSpider(scrapy.Spider):
                 self.page = self.page[28:]
             elif self.page.find('https://m.facebook.com/') != -1:
                 self.page = self.page[23:]
+        else:
+            kwargs['page']='force to always crawl a page'
 
 
         #parse date
@@ -144,6 +146,7 @@ class FacebookSpider(scrapy.Spider):
         for page in pages:
             self.page = page['page']
             self.group = page['group']
+            self.type = 'page'
             href = response.urljoin(page['page'])
             self.logger.info('Scraping facebook page {}'.format(href))
             return scrapy.Request(url=href,callback=self.parse_page,meta={'index':1})
